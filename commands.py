@@ -95,10 +95,6 @@ class MyCog(commands.Cog):
 
         await inter.response.send_message(embeds=[emb])
 
-    @commands.Cog.listener()
-    async def on_disconnect():
-        print("disconnected at", disnake.utils.utcnow())
-
     @commands.slash_command()
     async def get_member_cl_log(
         self, inter: disnake.AppCmdInter, membertag: commands.String[5, 12]
@@ -114,7 +110,7 @@ class MyCog(commands.Cog):
         for i in logs:
             embed.add_field(
                 name=to_datetime_from_seconds(i["time"]),
-                value=f'{i["map"]}|{i["result"]} {i["trophychange"]:+2} 🏆\n'\
-                      f'{i["team"]} vs {i["opponent"]}'
+                value=f'{i["map"]}|{i["result"]} {i["trophychange"]:+2} 🏆\n'
+                f'{i["team"]} vs {i["opponent"]}',
             )
         await inter.response.send_message(embed=embed)

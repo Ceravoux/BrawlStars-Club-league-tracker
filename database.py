@@ -8,7 +8,8 @@ load_dotenv()
 
 supabase = create_client(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"))
 club_table = supabase.table("club")
-club_league_table = supabase.table("club league")
+club_league_table = supabase.table("club_league")
+
 
 def create_battle_id(playertag, battletime):
     return f"{playertag[1:]}{to_seconds_from_epoch(battletime)}"
@@ -28,13 +29,13 @@ async def reset_club(client: BrawlStarsClient, clubtag: str):
         }
         for p in clubmembers
     ]
-
     oldmembers = club_table.delete().eq("clubtag", club.tag).execute()
     newmembers = club_table.insert(clubmembers).execute()
     return oldmembers.data, newmembers.data
 
 
-def insert_log(playertag, log, tickets):
+def insert_log(playertag: str, log, tickets: int):
+    # NOTE: does not support showdowns
     if playertag in (i.tag for i in log.teams[0]):
         team = [i.name for i in log.teams[0]]
         opponent = [i.name for i in log.teams[1]]
@@ -43,25 +44,21 @@ def insert_log(playertag, log, tickets):
         opponent = [i.name for i in log.teams[0]]
     id = create_battle_id(playertag, log.battleTime)
 
-    data = (
-        supabase.table("club league")
-        .insert(
-            {
-                "battle_id": id,
-                "playertag": playertag,
-                "team": team,
-                "opponent": opponent,
-                "map": log.event.map,
-                "type": log.type,
-                "result": log.result,
-                "tickets": tickets,
-                "trophychange": log.trophyChange,
-                "time": to_seconds_from_epoch(log.battleTime),
-            }
-        )
-        .execute()
-    )
-    return data
+    data = club_league_table.insert(
+        {
+            "battle_id": id,
+            "playertag": playertag,
+            "team": team,
+            "opponent": opponent,
+            "map": log.event.map,
+            "type": log.type,
+            "result": log.result,
+            "ticket": tickets,
+            "trophychange": log.trophyChange,
+            "time": to_seconds_from_epoch(log.battleTime),
+        }
+    ).execute()
+    return data.data
 
 
 def check_if_exists(playertag, battletime):
@@ -88,7 +85,3 @@ def get_club_stats(clubtag):
 def get_member_log(membertag):
     data = club_league_table.select("*").eq("playertag", membertag).execute()
     return data.data
-
-# print(supabase.table("club").delete().eq("playertag", "#8Q92R8UUU").execute().data)
-
-# issues supabase jsondecodeerror when rpc returns void

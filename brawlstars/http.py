@@ -1,4 +1,4 @@
-import aiohttp
+from aiohttp import ClientSession
 from urllib.parse import quote
 from .models.battle import Battle
 from .models.brawler import Brawler
@@ -17,12 +17,12 @@ class BrawlStarsClient:
     def __init__(self, *, api_key:str =None) -> None:
         self.api_key = api_key
         self.base = "https://api.brawlstars.com/v1"
-        self.session: aiohttp.ClientSession
+        self.session: ClientSession
 
     async def start(self):
         if self.api_key is None:
             raise RuntimeError("no api key")
-        self.session = aiohttp.ClientSession(
+        self.session = ClientSession(
             headers={"Authorization": "Bearer " + self.api_key}
         )
 
@@ -126,11 +126,12 @@ class BrawlStarsClient:
         data = await self._request(url)
         return ...
 
-    async def player_is_club_member(self, playertag, clubtag):
+    async def player_is_club_member(self, playertag:str, clubtag:str):
+
         try:
             player = await self.get_player(playertag)
         except Exception as e:
             raise e
         else:
-            player.club
+            return player.club.tag == str(clubtag)
         
