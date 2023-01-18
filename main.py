@@ -52,6 +52,7 @@ async def send_club_stats(stats, channel_id=1058823341345095815):
 
 
 async def update_club_stats():
+    global MESSAGE
     stats = get_club_stats(CLUBTAG)
     now = datetime.utcnow()
     embed = MESSAGE.embeds[0]
@@ -62,7 +63,7 @@ async def update_club_stats():
         value=f"last updated at <t:{to_seconds_from_epoch(now)}>",
         inline=False,
     )
-    await MESSAGE.edit(embeds=[embed])
+    MESSAGE = await MESSAGE.edit(embeds=[embed])
 
 
 async def watcher(clubtag):
@@ -70,9 +71,8 @@ async def watcher(clubtag):
     for m in members:
         logs = await client.get_battle_log(m.tag)
         for l in logs:
-            if l.battleTime.day != datetime.now(tz=tz).day or check_if_exists(
-                m.tag, l.battleTime
-            ):
+            if l.battleTime.day != datetime.now(BS_TIMEZONE=BS_TIMEZONE).day \
+                or check_if_exists(m.tag, l.battleTime):
                 continue
 
             # HACK: do this better?
@@ -93,7 +93,7 @@ async def reset_club_and_send_club_stats(client, clubtag):
 
 
 # Brawl Stars Clan League begins and ends at UTC-9
-tz = timezone(timedelta(hours=-9))
+BS_TIMEZONE = timezone(timedelta(hours=-9))
 
 # TODO: integrate this into commands so anyone can set this
 # on their own server. Input clubtags and channel id
@@ -103,14 +103,14 @@ tz = timezone(timedelta(hours=-9))
 _club_member_update = Loop(
     loop=loop,
     coro=reset_club_and_send_club_stats,
-    timezone=tz,
+    timezone=BS_TIMEZONE,
     weekday=(2,),
     pause=timedelta(days=7),
 )
 _club_league_monitor = Loop(
     loop=loop,
     coro=watcher,
-    timezone=tz,
+    timezone=BS_TIMEZONE,
     weekday=(2, 4, 6),
     pause=timedelta(days=7),
     interval=600,
@@ -119,13 +119,17 @@ _club_league_monitor = Loop(
 
 @bot.listen()
 async def on_ready():
+    # NOTE: remove this line v before deploying
+    await reset_club_and_send_club_stats(client, CLUBTAG)
     await asyncio.gather(
         _club_member_update.start(client, CLUBTAG), _club_league_monitor.start(CLUBTAG)
     )
+
 
 @bot.listen()
 async def on_disconnect():
     """To track bot's disconnection"""
     print("disconnected at", disnake.utils.utcnow())
+
 
 bot.run(getenv("TOKEN"))

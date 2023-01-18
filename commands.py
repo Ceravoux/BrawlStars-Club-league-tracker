@@ -2,7 +2,7 @@ import disnake
 from disnake.ext import commands
 from brawlstars import BrawlStarsClient
 from utils import format_battle_log
-from brawlstars.enums import BrawlerOptions
+from brawlstars.enums import BrawlerOptions, ClubRank
 from database import get_member_log
 from loop import to_datetime_from_seconds
 
@@ -114,3 +114,7 @@ class MyCog(commands.Cog):
                 f'{i["team"]} vs {i["opponent"]}',
             )
         await inter.response.send_message(embed=embed)
+
+    @commands.slash_command
+    async def set_club_rank(self, clubtag:str, rank:str = ClubRank):
+        ...
