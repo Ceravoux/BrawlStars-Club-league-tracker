@@ -81,3 +81,11 @@ class BrawlerOptions(Enum):
     MANDY = 16000064
 
 
+class ClubRank(Enum):
+    BRONZE = auto()
+    SILVER = auto()
+    GOLD = auto()
+    DIAMOND = auto()
+    MYTHIC = auto()
+    LEGEND = auto()
+    MASTER = auto()

@@ -4,6 +4,7 @@ from .models.battle import Battle
 from .models.brawler import Brawler
 from .models.player import Player
 from .models.club import Club, ClubMember
+from .models.events import ScheduledEvent
 from .models.errors import (
     BadRequest,
     NotFound,
@@ -14,7 +15,7 @@ from .models.errors import (
 
 
 class BrawlStarsClient:
-    def __init__(self, *, api_key:str =None) -> None:
+    def __init__(self, *, api_key: str = None) -> None:
         self.api_key = api_key
         self.base = "https://api.brawlstars.com/v1"
         self.session: ClientSession
@@ -26,7 +27,7 @@ class BrawlStarsClient:
             headers={"Authorization": "Bearer " + self.api_key}
         )
 
-    async def _request(self, url) -> dict|None:
+    async def _request(self, url) -> dict | None:
         if self.session is None:
             raise RuntimeError("session was not set; run client.start() first")
         async with self.session.get(url) as resp:
@@ -90,7 +91,7 @@ class BrawlStarsClient:
         data = await self._request(url)
         return [ClubMember(i) for i in data["items"]]
 
-    async def get_battle_log(self, playerTag: str, *, sort:int=0):
+    async def get_battle_log(self, playerTag: str, *, sort: int = 0):
         """Get list of recent battle results for a player.
         NOTE: It may take up to 30 minutes for a new battle
         to appear in the battlelog.
@@ -106,7 +107,11 @@ class BrawlStarsClient:
             raise ValueError("sort is not 0 or 1")
         url = "{0}/players/{1}/battlelog".format(self.base, quote(playerTag))
         data = await self._request(url)
-        return [Battle(i) for i in data["items"]] if sort == 0 else [Battle(i) for i in data["items"]][::-1]
+        return (
+            [Battle(i) for i in data["items"]]
+            if sort == 0
+            else [Battle(i) for i in data["items"]][::-1]
+        )
 
     async def get_brawler(self, brawlerId: int):
         """Get information about a brawler.
@@ -124,14 +129,12 @@ class BrawlStarsClient:
         """Get event rotation for ongoing events."""
         url = "{0}/events/rotation".format(self.base)
         data = await self._request(url)
-        return ...
+        return ScheduledEvent(data)
 
-    async def player_is_club_member(self, playertag:str, clubtag:str):
-
+    async def player_is_club_member(self, playertag: str, clubtag: str):
         try:
             player = await self.get_player(playertag)
         except Exception as e:
             raise e
         else:
             return player.club.tag == str(clubtag)
-        

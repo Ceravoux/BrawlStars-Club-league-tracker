@@ -91,15 +91,15 @@ class Loop:
         )
         self.pause = pause
         self.interval = interval
-        
-        self._last_index: int
-        self._task: asyncio.Task
-        self._sleeping: asyncio.Future
+
+        self._last_index: int = None
+        self._task: asyncio.Task = None
+        self._sleeping: asyncio.Future = None
 
     def _prepare_time(self):
         now = datetime.now(tz=self.timezone)
         if now.weekday() == self.weekday[self._weekday_index]:
-            if self.interval:
+            if self.interval and self._last_index is not None:
                 return self.interval
             t = 0
         else:
@@ -125,6 +125,7 @@ class Loop:
     async def _loop(self, *args, **kwargs):
 
         while True:
+            await self._sleep()
             try:
                 await self.coro(*args, **kwargs)
             except asyncio.CancelledError:
@@ -134,12 +135,8 @@ class Loop:
             except Exception as e:
                 await self.error(e)
 
-            else:
-                await self._sleep()
-
     async def error(self, exception) -> None:
         """Error handler, can be overridden by subclassing."""
-        exception = exception[-1]
         print(
             f"Unhandled exception in internal background task {self.coro.__name__!r}.",
             file=sys.stderr,

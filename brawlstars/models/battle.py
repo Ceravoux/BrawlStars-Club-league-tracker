@@ -1,7 +1,6 @@
 from typing import TypeVar
 from .utils import parse_battleTime, Base
-from ..enums import EventMode
-
+from .events import Event
 
 class TeamPlayer(Base):
     __slots__ = ("tag", "name", "brawler")
@@ -146,10 +145,4 @@ class Battle(Base):
         return self.battle.is_power_league_solo() or self.battle.is_power_league_team()
 
 
-class Event(Base):
-    __slots__ = ("id", "map", "mode")
 
-    def __init__(self, data: dict) -> None:
-        self.id: int = data.get("id")
-        self.mode: EventMode = data.get("mode")
-        self.map: str = data.get("map")
