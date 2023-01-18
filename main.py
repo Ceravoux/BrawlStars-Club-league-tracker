@@ -119,8 +119,6 @@ _club_league_monitor = Loop(
 
 @bot.listen()
 async def on_ready():
-    # NOTE: remove this line v before deploying
-    await reset_club_and_send_club_stats(client, CLUBTAG)
     await asyncio.gather(
         _club_member_update.start(client, CLUBTAG), _club_league_monitor.start(CLUBTAG)
     )
