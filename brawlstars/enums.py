@@ -49,6 +49,7 @@ class EventMode(str, Enum):
 
 
 class BrawlerOptions(Enum):
+    """# NOTE: this is incomplete!!"""
     SHELLY = 16000000
     BROCK = 16000003
     RICO = 16000004
@@ -82,10 +83,22 @@ class BrawlerOptions(Enum):
 
 
 class ClubRank(Enum):
-    BRONZE = auto()
-    SILVER = auto()
-    GOLD = auto()
-    DIAMOND = auto()
-    MYTHIC = auto()
-    LEGEND = auto()
-    MASTER = auto()
+    BRONZE1 = 11
+    BRONZE2 = 12
+    BRONZE3 = 13
+    SILVER1 = 21
+    SILVER2 = 22
+    SILVER3 = 23
+    GOLD1 = 31
+    GOLD2 = 32
+    GOLD3 = 33
+    DIAMOND1 = 41
+    DIAMOND2 = 42
+    DIAMOND3 = 43
+    MYTHIC1 = 51
+    MYTHIC2 = 52
+    MYTHIC3 = 53
+    LEGEND1 = 61
+    LEGEND2 = 62
+    LEGEND3 = 63
+    MASTERS = 70

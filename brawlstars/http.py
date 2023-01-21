@@ -15,6 +15,7 @@ from .models.errors import (
 
 
 class BrawlStarsClient:
+    __slots__ = ("api_key", "base", "session")
     def __init__(self, *, api_key: str = None) -> None:
         self.api_key = api_key
         self.base = "https://api.brawlstars.com/v1"

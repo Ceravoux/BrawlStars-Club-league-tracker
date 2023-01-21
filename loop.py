@@ -71,7 +71,8 @@ class Loop:
             the coroutine to be awaited on this loop
         timezone: `datetime.tzinfo`
             timezone for deciding the time
-        weekday: `Sequence[int]`
+        weekday: `tuple[int]`
+            0 = Monday, ..., 6 = Sunday
             resumes loop every given weekday at 00:00
         pause: `datetime.timedelta`
             pauses loop for given time after the last loop of the week
@@ -89,6 +90,7 @@ class Loop:
             range(len(weekday)),
             key=lambda x: from_weekday(self.weekday[x], tzinfo=self.timezone),
         )
+        print(self._weekday_index)
         self.pause = pause
         self.interval = interval
 
@@ -98,14 +100,17 @@ class Loop:
 
     def _prepare_time(self):
         now = datetime.now(tz=self.timezone)
+
         if now.weekday() == self.weekday[self._weekday_index]:
             if self.interval and self._last_index is not None:
                 return self.interval
-            t = 0
-        else:
-            t = to_seconds_from_now(
-                from_weekday(self.weekday[self._weekday_index], tzinfo=self.timezone)
-            )
+            if self.interval and self._last_index is None:
+                self._last_index = self._weekday_index
+                return 0
+
+        t = to_seconds_from_now(
+            from_weekday(self.weekday[self._weekday_index], tzinfo=self.timezone)
+        )
         self._last_index = self._weekday_index
 
         if self._last_index == len(self.weekday) - 1:
@@ -119,6 +124,7 @@ class Loop:
     async def _sleep(self):
         self._sleeping = self.loop.create_future()
         t = self._prepare_time()
+        print(t, self.coro.__name__)
         self.loop.call_later(t, self._sleeping.set_result, 1)
         await self._sleeping
 
@@ -153,7 +159,7 @@ class Loop:
         if self._task is not None and not self._task.done():
             print(f"{self._task} is running!")
             return
-        print("start")
+        print("start", self.coro.__name__)
         self._task = self.loop.create_task(
             self._loop(*args, **kwargs), name=repr(self.coro.__name__)
         )

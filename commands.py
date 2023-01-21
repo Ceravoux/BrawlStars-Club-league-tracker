@@ -3,7 +3,7 @@ from disnake.ext import commands
 from brawlstars import BrawlStarsClient
 from utils import format_battle_log
 from brawlstars.enums import BrawlerOptions, ClubRank
-from database import get_member_log
+from database import get_member_log, insert_club_info
 from loop import to_datetime_from_seconds
 
 
@@ -104,6 +104,7 @@ class MyCog(commands.Cog):
         except Exception as e:
             await inter.response.send_message(*e.args)
             raise e
+        print(logs)
         embed = disnake.Embed(
             title="{}'s Club League Log".format(logs[0]["playername"])
         )
@@ -115,6 +116,7 @@ class MyCog(commands.Cog):
             )
         await inter.response.send_message(embed=embed)
 
-    @commands.slash_command
-    async def set_club_rank(self, clubtag:str, rank:str = ClubRank):
-        ...
+    @commands.slash_command()
+    async def set_cl_log(self, inter:disnake.AppCmdInter, clubtag:str, rank: ClubRank):
+        insert_club_info(clubtag, ClubRank(rank).name, inter.guild_id, inter.channel_id)
+        await inter.response.send_message("Success.")

@@ -1,9 +1,9 @@
 from PIL import Image, ImageFilter
-import re
+from re import compile
 from brawlstars.models import Battle, BrawlerInfo
 
 _subscript_table = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-_alphanumeric_regex = re.compile(r"[^a-z0-9]")
+_alphanumeric_regex = compile(r"[^a-z0-9]")
 
 
 def to_gif(path, names):
@@ -51,10 +51,15 @@ def format_battle_log(battle: Battle):
     return fmt
 
 
-def format_member_stats(stat: dict):
-    return "{:2d}/14🎟️ {:2d} 🏆 | {}".format(
-        stat["tickets"], stat["trophy"], stat["playername"]
-    )
+def format_member_stats(stats: list[dict]) -> tuple[str, int]:
+    string = ""
+    trophy = 0
+    for s in stats:
+        string += "{:2d}/14🎟️ {:2d} 🏆 | {}\n".format(
+            s["tickets"], s["trophy"], s["playername"]
+        )
+        trophy += s["trophy"]
+    return string, trophy
 
 
 _emoji = {
@@ -122,4 +127,25 @@ _emoji = {
     "mandy": "<a:mandy:1059035883078156348>",
     "otis": "<a:otis:1059035885934485505>",
     "sam": "<a:sam:1059035889763889183>",
+}
+clubrank = {
+    "bronze1": "https://media.discordapp.net/attachments/1058823341345095815/1065969265771024404/bronze1.png",
+    "bronze2": "https://media.discordapp.net/attachments/1058823341345095815/1065969266186276965/bronze2.png",
+    "bronze3": "https://media.discordapp.net/attachments/1058823341345095815/1065969266458890352/bronze3.png",
+    "silver1": "https://media.discordapp.net/attachments/1058823341345095815/1065969334805069904/silver1.png",
+    "silver2": "https://media.discordapp.net/attachments/1058823341345095815/1065969335018999878/silver2.png",
+    "silver3": "https://media.discordapp.net/attachments/1058823341345095815/1065969335371300884/silver3.png",
+    "gold1": "https://media.discordapp.net/attachments/1058823341345095815/1065969267478118400/gold1.png",
+    "gold2": "https://media.discordapp.net/attachments/1058823341345095815/1065969267729780817/gold2.png",
+    "gold3": "https://media.discordapp.net/attachments/1058823341345095815/1065969307785363568/gold3.png",
+    "diamond1": "https://media.discordapp.net/attachments/1058823341345095815/1065969266710560818/diamond1.png",
+    "diamond2": "https://media.discordapp.net/attachments/1058823341345095815/1065969266991583313/diamond2.png",
+    "diamond3": "https://media.discordapp.net/attachments/1058823341345095815/1065969267226447913/diamond3.png",
+    "mythic1": "https://media.discordapp.net/attachments/1058823341345095815/1065969309370814494/mythic1.png",
+    "mythic2": "https://media.discordapp.net/attachments/1058823341345095815/1065969309765091358/mythic2.png",
+    "mythic3": "https://media.discordapp.net/attachments/1058823341345095815/1065969310159343707/mythic3.png",
+    "legend1": "https://media.discordapp.net/attachments/1058823341345095815/1065969308120924240/legend1.png",
+    "legend2": "https://media.discordapp.net/attachments/1058823341345095815/1065969308464844841/legend2.png",
+    "legend3": "https://media.discordapp.net/attachments/1058823341345095815/1065969308754247740/legend3.png",
+    "masters": "https://media.discordapp.net/attachments/1058823341345095815/1065969309060448256/masters.png",
 }
