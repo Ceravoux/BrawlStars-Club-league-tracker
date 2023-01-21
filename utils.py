@@ -41,7 +41,7 @@ def format_brawler_info(brawlerinfo: BrawlerInfo):
 
 
 def format_battle_log(battle: Battle):
-    fmt = f"{battle.event.mode}|{battle.event.map}\n{battle.result} {battle.trophyChange:+2} 🏆\n"
+    fmt = f"{battle.event.mode} | {battle.event.map}\n{battle.result} {battle.trophyChange:+2} 🏆\n"
     for t in battle.teams:
         for p in t:
             fmt += format_brawler_info(p.brawler) + p.name + "\n"

@@ -90,7 +90,7 @@ class Loop:
             range(len(weekday)),
             key=lambda x: from_weekday(self.weekday[x], tzinfo=self.timezone),
         )
-        print(self._weekday_index)
+        print(self._weekday_index, self.weekday)
         self.pause = pause
         self.interval = interval
 

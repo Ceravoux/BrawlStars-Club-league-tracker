@@ -1,8 +1,8 @@
 from os import getenv
 from dotenv import load_dotenv
 from supabase import create_client
-# from loop import to_seconds_from_epoch
-# from brawlstars.http import BrawlStarsClient
+from loop import to_seconds_from_epoch
+from brawlstars.http import BrawlStarsClient
 
 load_dotenv()
 
@@ -10,8 +10,6 @@ supabase = create_client(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"))
 club_members_table = supabase.table("club_members")
 club_league_table = supabase.table("club_league")
 clubs_table = supabase.table("clubs")
-BrawlStarsClient = 0
-to_sesconds_from_epoch = 0
 
 def create_battle_id(playertag, battletime):
     return f"{playertag[1:]}{to_seconds_from_epoch(battletime)}"
@@ -44,11 +42,10 @@ def insert_log(playertag: str, log, tickets: int):
     else:
         team = [i.name for i in log.teams[1]]
         opponent = [i.name for i in log.teams[0]]
-    id = create_battle_id(playertag, log.battleTime)
 
     data = club_league_table.insert(
         {
-            "battle_id": id,
+            "battle_id": create_battle_id(playertag, log.battleTime),
             "playertag": playertag,
             "team": team,
             "opponent": opponent,
@@ -90,7 +87,7 @@ def get_member_log(membertag):
         {"membertag": membertag}
     ).execute()
     return data.data
-print(get_member_log("#8JCLV8L8U"))
+
 
 def insert_club_info(clubtag, clubrank, serverid, channelid):
     data = clubs_table.insert(
@@ -104,6 +101,8 @@ def insert_club_info(clubtag, clubrank, serverid, channelid):
     ).execute()
     return data.data
 
+
 def get_club_info(clubtag):
     data = clubs_table.select("clubtag").eq("clubtag", clubtag).execute()
     return data.data
+

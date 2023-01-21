@@ -30,10 +30,10 @@ bot.add_cog(MyCog(client))
 class ClubLeagueTracker:
     __slots__ = ("clubtag", "message", "channel_id")
 
-    def __init__(self, clubtag: str, channel_id: int) -> None:
-        self.clubtag = clubtag
-        self.channel_id = channel_id
-        self.message: disnake.Message = None
+    def __init__(self) -> None:
+        self.clubtag:list[str] = None
+        self.channel_id:list[int] = None
+        self.message: list[disnake.Message] = None
 
     async def set_message(self, msgid: int):
         channel = await bot.fetch_channel(self.channel_id)
@@ -83,23 +83,24 @@ class ClubLeagueTracker:
         self.message = await self.message.edit(embeds=[embed])
 
     async def watcher(self):
-        members = await client.get_club_members(self.clubtag)
-        for m in members:
-            logs = await client.get_battle_log(m.tag)
-            for l in logs:
-                if l.battleTime.day != datetime.now(
-                    tz=BS_TIMEZONE
-                ).day or check_if_exists(m.tag, l.battleTime):
-                    continue
+        for c in self.clubtag:
+            members = await client.get_club_members(c)
+            for m in members:
+                logs = await client.get_battle_log(m.tag)
+                for l in logs:
+                    if l.battleTime.day != datetime.now(
+                        tz=BS_TIMEZONE
+                    ).day or check_if_exists(m.tag, l.battleTime):
+                        continue
 
-                # HACK: do this better?
-                if l.is_regular_CL_random() or l.is_regular_CL_team():
-                    insert_log(m.tag, l, 1)
-                    inc_ticket_and_trophy(m.tag, 1, l.trophyChange)
+                    # HACK: do this better?
+                    if l.is_regular_CL_random() or l.is_regular_CL_team():
+                        insert_log(m.tag, l, 1)
+                        inc_ticket_and_trophy(m.tag, 1, l.trophyChange)
 
-                if l.is_power_match_CL_random() or l.is_power_match_CL_team():
-                    insert_log(m.tag, l, 2)
-                    inc_ticket_and_trophy(m.tag, 2, l.trophyChange)
+                    if l.is_power_match_CL_random() or l.is_power_match_CL_team():
+                        insert_log(m.tag, l, 2)
+                        inc_ticket_and_trophy(m.tag, 2, l.trophyChange)
 
         await self.update_club_stats()
 
