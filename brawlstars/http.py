@@ -12,7 +12,8 @@ from .models.errors import (
     TooManyRequests,
     BrawlStarsServerError,
 )
-
+from asyncio import sleep
+from typing import AsyncGenerator
 
 class BrawlStarsClient:
     __slots__ = ("api_key", "base", "session")
@@ -75,7 +76,7 @@ class BrawlStarsClient:
         data = await self._request(url)
         return Club(data)
 
-    async def get_club_members(self, clubTag: str, **kwargs) -> list[ClubMember]:
+    async def get_club_members(self, clubTag: str, **kwargs) -> AsyncGenerator[ClubMember, None]:
         """List club members.
 
         Parameters
@@ -90,9 +91,13 @@ class BrawlStarsClient:
 
         url = "{0}/clubs/{1}/members".format(self.base, quote(clubTag))
         data = await self._request(url)
-        return [ClubMember(i) for i in data["items"]]
+        async def clubmembers():
+            for i in data["items"]:
+                yield ClubMember(i)
+                await sleep(0)
+        return clubmembers()
 
-    async def get_battle_log(self, playerTag: str, *, sort: int = 0):
+    async def get_battle_log(self, playerTag: str, *, sort: int = 1) -> AsyncGenerator[Battle, None]:
         """Get list of recent battle results for a player.
         NOTE: It may take up to 30 minutes for a new battle
         to appear in the battlelog.
@@ -102,17 +107,18 @@ class BrawlStarsClient:
         playerTag: `int`
             Tag of the player.
         sort: `int`
-            0 for DESCENDING (default) or 1 for ASCENDING
+            -1 for ASCENDING (default) or 1 for DESCENDING
         """
-        if sort not in (0, 1):
-            raise ValueError("sort is not 0 or 1")
+        if sort not in (-1, 1):
+            raise ValueError("sort is not -1 or 1")
         url = "{0}/players/{1}/battlelog".format(self.base, quote(playerTag))
         data = await self._request(url)
-        return (
-            [Battle(i) for i in data["items"]]
-            if sort == 0
-            else [Battle(i) for i in data["items"]][::-1]
-        )
+        async def battlelogs():
+            for i in data["items"][::sort]:
+                yield Battle(i)
+                await sleep(0)
+        return battlelogs()
+
 
     async def get_brawler(self, brawlerId: int):
         """Get information about a brawler.
@@ -127,6 +133,7 @@ class BrawlStarsClient:
         return Brawler(data)
 
     async def get_event_rotation(self, /):
+        #XXX should return list
         """Get event rotation for ongoing events."""
         url = "{0}/events/rotation".format(self.base)
         data = await self._request(url)

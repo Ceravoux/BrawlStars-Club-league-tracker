@@ -1,8 +1,8 @@
 from os import getenv
 from dotenv import load_dotenv
 from supabase import create_client
-from loop import to_seconds_from_epoch
-from brawlstars.http import BrawlStarsClient
+from brawlstars.http import BrawlStarsClient, Battle
+import json
 
 load_dotenv()
 
@@ -10,9 +10,11 @@ supabase = create_client(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"))
 club_members_table = supabase.table("club_members")
 club_league_table = supabase.table("club_league")
 clubs_table = supabase.table("clubs")
+discord_table = supabase.table("discord")
+
 
 def create_battle_id(playertag, battletime):
-    return f"{playertag[1:]}{to_seconds_from_epoch(battletime)}"
+    return f"{playertag[1:]}{battletime.timestamp():.0f}"
 
 
 async def reset_club(client: BrawlStarsClient, clubtag: str):
@@ -34,8 +36,11 @@ async def reset_club(client: BrawlStarsClient, clubtag: str):
     return oldmembers.data, newmembers.data
 
 
-def insert_log(playertag: str, log, tickets: int):
+def insert_log(playertag: str, log: Battle, tickets: int):
+    """
     # NOTE: does not support showdowns
+    # because club league is all 3v3
+    """
     if playertag in (i.tag for i in log.teams[0]):
         team = [i.name for i in log.teams[0]]
         opponent = [i.name for i in log.teams[1]]
@@ -54,15 +59,22 @@ def insert_log(playertag: str, log, tickets: int):
             "result": log.result,
             "ticket": tickets,
             "trophychange": log.trophyChange,
-            "time": to_seconds_from_epoch(log.battleTime),
+            "time": round(log.battleTime.timestamp()),
         }
     ).execute()
     return data.data
 
 
-def check_if_exists(playertag, battletime):
-    id = create_battle_id(playertag, battletime)
-    data = club_league_table.select("battle_id").eq("battle_id", id).execute()
+def check_if_exists(arg, table, field):
+    match table:
+        case "club_league":
+            _table = club_league_table
+        case "club_members":
+            _table = club_members_table
+        case "clubs":
+            _table = clubs_table
+
+    data = _table.select(field).eq(field, arg).execute()
     if not data.data:
         return False
     return True
@@ -82,27 +94,106 @@ def get_club_stats(clubtag):
 
 
 def get_member_log(membertag):
-    data = supabase.rpc(
-        "get_member_log",
-        {"membertag": membertag}
-    ).execute()
+    data = supabase.rpc("get_member_log", {"membertag": membertag}).execute()
     return data.data
 
 
-def insert_club_info(clubtag, clubrank, serverid, channelid):
-    data = clubs_table.insert(
-        {
-            "clubtag": clubtag,
-            "clubrank": clubrank,
-            "serverid": serverid,
-            "channelid": channelid,
-            "messageid": 0,
-        }
-    ).execute()
+def insert_club_and_discord_info(
+    clubtag: str, clubrank: str, serverid: int, channelid: int
+):
+    data = (
+        clubs_table.insert(
+            {
+                "clubtag": clubtag,
+                "clubrank": clubrank.lower(),
+            }
+        )
+        .execute()
+        .data,
+        discord_table.insert(
+            {
+                "clubtag": clubtag,
+                "serverid": serverid,
+                "channelid": channelid,
+            }
+        )
+        .execute()
+        .data,
+    )
+    return data
+
+
+def get_clubs():
+    """
+    returns an `array` of {
+        clubtag: str,
+        clubrank: str,
+        discord: [
+            {serverid: int, channelid: int, messageid: int},
+            {serverid: int, channelid: int, messageid: int},
+            ...
+        ]
+    }
+    """
+
+    clubs = clubs_table.select("*").execute().data
+    data = (
+        discord_table.select("*")
+        .neq("channelid", 0)
+        .in_("clubtag", [i["clubtag"] for i in clubs])
+        .execute()
+        .data
+    )
+    for c in clubs:
+        c["discord"] = [
+            {
+                "serverid": i["serverid"],
+                "channelid": i["channelid"],
+                "messageid": i["messageid"],
+            }
+            for i in data
+            if i["clubtag"] == c["clubtag"]
+        ]
+
+    return clubs
+
+
+def edit_discord_info(clubtag: str, serverid, channelid):
+    data = (
+        discord_table.update({"channelid": channelid})
+        .eq("clubtag", clubtag)
+        .eq("serverid", serverid)
+        .execute()
+    )
     return data.data
 
 
-def get_club_info(clubtag):
-    data = clubs_table.select("clubtag").eq("clubtag", clubtag).execute()
+def get_server_logs(serverid):
+    data = discord_table.select("*").eq("serverid", serverid).execute()
     return data.data
+
+
+def remove_server_logs(serverid, clubtags: list):
+    data = (
+        discord_table.delete()
+        .eq("serverid", serverid)
+        .in_("clubtag", clubtags)
+        .execute()
+    )
+    return data.data
+
+
+def export_battle_logs(time, clubtag):
+    logs = {"clubtag": clubtag, "ClubLeagueTime": str(time.day())}
+    members = (
+        club_members_table.select("playertag", "playername")
+        .eq("clubtag", clubtag)
+        .execute()
+    )
+    for d in members.data:
+        data = club_league_table.select("*").eq("playertag", d["playertag"]).execute()
+        logs[d["playername"]] = data.data
+    with open("club_league_logs.json", "w", encoding="utf8") as f:
+        json.dump(logs, f, ensure_ascii=False)
+    print(f"exported club league logs for {clubtag} on {time}")
 

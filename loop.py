@@ -9,15 +9,10 @@ def to_datetime_from_seconds(s: int):
     return datetime(*gmtime(s)[:6])
 
 
-def to_seconds_from_epoch(dt: datetime):
-    dt = dt.astimezone(timezone.utc)
-    return round((dt - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds())
-
-
 def to_seconds_from_now(dt: datetime):
     now = datetime.now(timezone.utc)
     dt = dt.astimezone(timezone.utc)
-    assert dt >= now, "dt is < now"
+    # assert dt >= now, f"{dt} is < {now}"
     return round((dt - now).total_seconds())
 
 
@@ -36,7 +31,6 @@ def from_weekday(
 
 
 class Loop:
-
     __slots__ = (
         "timezone",
         "loop",
@@ -55,7 +49,7 @@ class Loop:
         *,
         loop: asyncio.AbstractEventLoop,
         coro,
-        timezone: timezone,
+        timezone: timezone = timezone.utc,
         weekday: tuple[int],
         pause: timedelta = timedelta(0),
         interval: int = None,
@@ -70,7 +64,8 @@ class Loop:
         coro: `Coroutine`
             the coroutine to be awaited on this loop
         timezone: `datetime.tzinfo`
-            timezone for deciding the time
+            timezone for deciding the time of day
+            e.g. UTC+8 if you want to start it at 4am UTC-4
         weekday: `tuple[int]`
             0 = Monday, ..., 6 = Sunday
             resumes loop every given weekday at 00:00
@@ -78,19 +73,15 @@ class Loop:
             pauses loop for given time after the last loop of the week
             default timedelta(0)
         interval: `int`
-            the interval between each call in seconds.
+            the interval between each call in seconds. (0 ~ 86400)
 
         """
         self.loop = loop
         self.coro = coro
         self.timezone = timezone
         self.weekday = tuple(sorted(weekday))
+        self.to_closest_weekday()
 
-        self._weekday_index = min(
-            range(len(weekday)),
-            key=lambda x: from_weekday(self.weekday[x], tzinfo=self.timezone),
-        )
-        print(self._weekday_index, self.weekday)
         self.pause = pause
         self.interval = interval
 
@@ -98,26 +89,50 @@ class Loop:
         self._task: asyncio.Task = None
         self._sleeping: asyncio.Future = None
 
-    def _prepare_time(self):
-        now = datetime.now(tz=self.timezone)
+    def to_closest_weekday(self):
+        self._weekday_index = min(
+            range(len(self.weekday)),
+            key=lambda x: from_weekday(self.weekday[x], tzinfo=self.timezone),
+        )
 
+    def _prepare_time(self): # HACK: do this better
+        now = datetime.now(tz=self.timezone)
+        print(f"{self.coro.__name__} current weekday: {now.weekday()}; index weekday: {self.weekday[self._weekday_index]}")
+        t = 0
+
+        # we initialise a flag so no need to do 
+        # now.weekday() == self.weekday[self._weekday_index] twice
+        flag = False
         if now.weekday() == self.weekday[self._weekday_index]:
+            flag = True
             if self.interval and self._last_index is not None:
-                return self.interval
+                # assume weekday (1 3 5) and 20h interval
+                # 2nd loop will happen on day 2 which is not part of sched
+                # so we should not return interval for that
+                if (now + timedelta(seconds=self.interval)).weekday() in self.weekday:
+                    return self.interval
+
             if self.interval and self._last_index is None:
                 self._last_index = self._weekday_index
-                return 0
+                return t
+        
+        next_day = from_weekday(self.weekday[self._weekday_index], tzinfo=self.timezone)
 
-        t = to_seconds_from_now(
-            from_weekday(self.weekday[self._weekday_index], tzinfo=self.timezone)
-        )
+        if not (flag and self._last_index is None):
+            t += to_seconds_from_now(next_day) 
+
+        if self._weekday_index == 0 and self._last_index:
+            if (now + timedelta(seconds=self.pause.total_seconds())) > next_day:
+                t += int(self.pause.total_seconds()) 
+
         self._last_index = self._weekday_index
 
         if self._last_index == len(self.weekday) - 1:
-            t += round(self.pause.total_seconds())
             self._weekday_index = 0
         else:
             self._weekday_index += 1
+
+        print(f"{self.coro.__name__} next idx", self._weekday_index, "current", self._last_index)         
 
         return t
 
