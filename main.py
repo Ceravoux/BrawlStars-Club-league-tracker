@@ -24,7 +24,6 @@ from datetime import timezone, timedelta, datetime
 import streamlit as st
 
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 loop = asyncio.new_event_loop()
 client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
 loop.run_until_complete(client.start())
@@ -228,4 +227,4 @@ def update_CL_WEEK():
 CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(days=7, minutes=5)
 
 
-bot.run(st.secrets["TOKEN"])
+loop.run_until_complete(bot.start(st.secrets["TOKEN"]))
