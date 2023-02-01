@@ -164,7 +164,7 @@ async def set_cl_log(inter: disnake.AppCmdInter, clubtag: str, rank: ClubRank, c
         Where the log will be set.
         Defaults to current channel.
     """
-    # check if club exists in game
+    # wait a while
     await inter.response.defer(with_message=True)
     try:
         await client.get_club(clubtag)
@@ -231,5 +231,8 @@ def update_CL_WEEK():
 
 CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(days=7, minutes=5)
 
-
+async def keep_alive():
+    await asyncio.sleep(60)
+    print(disnake.utils.utcnow())
+    
 loop.run_until_complete(bot.start(st.secrets["TOKEN"]))
