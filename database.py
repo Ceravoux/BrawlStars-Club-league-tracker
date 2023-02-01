@@ -71,6 +71,10 @@ def check_if_exists(arg, table, field):
             _table = club_members_table
         case "clubs":
             _table = clubs_table
+        case "discord":
+            _table = discord_table
+        case _:
+            raise ValueError(f"the table '{table}' does not exist.")
 
     data = _table.select(field).eq(field, arg).execute()
     if not data.data:
