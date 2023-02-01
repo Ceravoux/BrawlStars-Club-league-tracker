@@ -24,7 +24,7 @@ from datetime import timezone, timedelta, datetime
 import streamlit as st
 
 
-
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 loop = asyncio.new_event_loop()
 client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
 loop.run_until_complete(client.start())
