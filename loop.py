@@ -115,15 +115,16 @@ class Loop:
             if self.interval and self._last_index is None:
                 self._last_index = self._weekday_index
                 return t
-        
+
         next_day = from_weekday(self.weekday[self._weekday_index], tzinfo=self.timezone)
 
         if not (flag and self._last_index is None):
             t += to_seconds_from_now(next_day) 
 
-        if self._weekday_index == 0 and self._last_index:
-            if (now + timedelta(seconds=self.pause.total_seconds())) > next_day:
-                t += int(self.pause.total_seconds()) 
+        if self._weekday_index == 0 and self._last_index is not None:
+            #XXX
+            # if (now + timedelta(seconds=self.pause.total_seconds())) > next_day:
+            t += int(self.pause.total_seconds()) 
 
         self._last_index = self._weekday_index
 
@@ -179,3 +180,15 @@ class Loop:
             self._loop(*args, **kwargs), name=repr(self.coro.__name__)
         )
         return self._task
+
+async def foo():
+    print(101)
+loop = asyncio.new_event_loop()
+_club_member_update = Loop(
+    loop=loop,
+    coro=foo,
+    timezone=timezone(timedelta(hours=-9, minutes=-5)),
+    weekday=(2,),
+    pause=timedelta(days=7),
+)
+loop.run_until_complete(_club_member_update.start())
