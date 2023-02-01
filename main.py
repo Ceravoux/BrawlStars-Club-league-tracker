@@ -13,11 +13,13 @@ from database import (
     get_club_stats,
     get_clubs,
     create_battle_id,
-    insert_club_and_discord_info,
+    insert_club,
+    insert_discord_info,
     edit_discord_info,
     remove_server_logs,
     get_server_logs,
-    export_battle_logs
+    export_battle_logs,
+
 )
 from utils import format_member_stats, clubrank
 from datetime import timezone, timedelta, datetime
@@ -170,10 +172,12 @@ async def set_cl_log(inter: disnake.AppCmdInter, clubtag: str, rank: ClubRank, c
         return await inter.followup.send(*e.args)
 
     # check database
-    if check_if_exists(clubtag, "clubs", "clubtag") and check_if_exists(inter.guild_id, "discord", "serverid"):
-        return await inter.followup.send(f"Logs for {clubtag} has been set in this server!")
+    if not check_if_exists(clubtag, "clubs", "clubtag"):
+        insert_club(clubtag, ClubRank(rank).name)
 
-    insert_club_and_discord_info(clubtag, ClubRank(rank).name, inter.guild_id, channelid or inter.channel_id)
+    if check_if_exists(inter.guild_id, "discord", "serverid"):
+        return await inter.followup.send(f"Logs for {clubtag} has been set in this server!")
+    insert_discord_info(clubtag, inter.guild_id, channelid or inter.channel_id)
     await inter.followup.send(f"Successfully set a log for {clubtag}.")
 
 
