@@ -86,7 +86,8 @@ def inc_ticket_and_trophy(ptag: str, tix: int, trophychange: int):
     data = supabase.rpc(
         "inc_ticket_and_trophy",
         {"ptag": ptag, "tix": tix, "trophychange": trophychange},
-    ).execute()
+    )
+    data = data.execute()
     return data.data
 
 
@@ -200,3 +201,5 @@ def export_battle_logs(time, clubtag):
         json.dump(logs, f, ensure_ascii=False)
     print(f"exported club league logs for {clubtag} on {time}")
 
+
+inc_ticket_and_trophy("#8JCLV8L8U",2, 9)
