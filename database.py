@@ -27,7 +27,7 @@ async def reset_club(client: BrawlStarsClient, clubtag: str):
             "tickets": 0,
             "trophy": 0,
         }
-        for p in clubmembers
+        async for p in clubmembers
     ]
     oldmembers = club_members_table.delete().eq("clubtag", club.tag).execute()
     newmembers = club_members_table.insert(clubmembers).execute()
