@@ -180,15 +180,3 @@ class Loop:
             self._loop(*args, **kwargs), name=repr(self.coro.__name__)
         )
         return self._task
-
-async def foo():
-    print(101)
-loop = asyncio.new_event_loop()
-_club_member_update = Loop(
-    loop=loop,
-    coro=foo,
-    timezone=timezone(timedelta(hours=-9, minutes=-5)),
-    weekday=(2,),
-    pause=timedelta(days=7),
-)
-loop.run_until_complete(_club_member_update.start())
