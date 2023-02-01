@@ -48,7 +48,7 @@ async def send_club_stats(stats, clubinfo):
         )
         .add_field(
             name=f"Total Trophy: {trophy}",
-            value=f"last updated at <t:{now.timestamp():0f}>",
+            value=f"last updated at <t:{now.timestamp():.0f}>",
             inline=False,
         )
         .set_thumbnail(clubrank[clubinfo["clubrank"]])
@@ -58,11 +58,11 @@ async def send_club_stats(stats, clubinfo):
             channel = await bot.fetch_channel(i["channelid"])
         except:
             edit_discord_info(
-                clubinfo["clubtag"], i["serverid"], i["channelid"]
+                {"channelid":0}, clubinfo["clubtag"], i["serverid"]
             )
             continue
         message = await channel.send(embed=embed)
-        edit_discord_info(clubinfo["clubtag"], {"messageid": message.id})
+        edit_discord_info({"messageid": message.id}, clubinfo["clubtag"], i["serverid"])
 
 
 async def update_club_stats(clubinfo):
@@ -74,7 +74,7 @@ async def update_club_stats(clubinfo):
             channel = await bot.fetch_channel(i["channelid"])
         except:
             edit_discord_info(
-                clubinfo["clubtag"], i["serverid"], i["channelid"]
+                {"channelid":0}, clubinfo["clubtag"], i["serverid"]
             )
             continue
         try:
@@ -157,6 +157,7 @@ async def set_cl_log(inter: disnake.AppCmdInter, clubtag: str, rank: ClubRank, c
     """set club league log of given clubtag on this server
     Parameters
     ----------
+    clubtag: 
     channelid: `int`
         Where the log will be set.
         Defaults to current channel.

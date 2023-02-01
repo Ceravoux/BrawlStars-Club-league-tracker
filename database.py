@@ -160,9 +160,9 @@ def get_clubs():
     return clubs
 
 
-def edit_discord_info(clubtag: str, serverid, channelid):
+def edit_discord_info(edit:dict, clubtag:str, serverid:int):
     data = (
-        discord_table.update({"channelid": channelid})
+        discord_table.update(edit)
         .eq("clubtag", clubtag)
         .eq("serverid", serverid)
         .execute()
