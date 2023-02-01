@@ -1,12 +1,10 @@
-from os import getenv
-from dotenv import load_dotenv
 from supabase import create_client
 from brawlstars.http import BrawlStarsClient, Battle
 import json
+import streamlit as st
 
-load_dotenv()
 
-supabase = create_client(getenv("SUPABASE_URL"), getenv("SUPABASE_KEY"))
+supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
 club_members_table = supabase.table("club_members")
 club_league_table = supabase.table("club_league")
 clubs_table = supabase.table("clubs")

@@ -21,13 +21,12 @@ from database import (
 )
 from utils import format_member_stats, clubrank
 from datetime import timezone, timedelta, datetime
-from os import getenv
-from dotenv import load_dotenv
+import streamlit as st
 
-load_dotenv()
+
 
 loop = asyncio.new_event_loop()
-client = BrawlStarsClient(api_key=getenv("API_KEY"))
+client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
 loop.run_until_complete(client.start())
 
 bot = InteractionBot(activity=disnake.Activity(name="clubs", type=disnake.ActivityType.watching), loop=loop)
@@ -229,4 +228,4 @@ def update_CL_WEEK():
 CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(days=7, minutes=5)
 
 
-bot.run(getenv("TOKEN"))
+bot.run(st.secrets["TOKEN"])
