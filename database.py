@@ -100,9 +100,7 @@ def get_member_log(membertag):
     return data.data
 
 
-def insert_club_and_discord_info(
-    clubtag: str, clubrank: str, serverid: int, channelid: int
-):
+def insert_club(clubtag, clubrank):
     data = (
         clubs_table.insert(
             {
@@ -111,18 +109,21 @@ def insert_club_and_discord_info(
             }
         )
         .execute()
-        .data,
-        discord_table.insert(
+    )
+    return data.data
+
+def insert_discord_info(
+    clubtag: str, serverid: int, channelid: int
+):
+    data = discord_table.insert(
             {
                 "clubtag": clubtag,
                 "serverid": serverid,
                 "channelid": channelid,
             }
-        )
-        .execute()
-        .data,
-    )
-    return data
+        ).execute()
+    
+    return data.data
 
 
 def get_clubs():
