@@ -83,8 +83,7 @@ def check_if_exists(arg, table, field):
 
 
 def inc_ticket_and_trophy(ptag: str, tix: int, trophychange: int):
-    data = supabase.rpc("inc_ticket_and_trophy", {"ptag": ptag, "tix": tix, "trophychange": trophychange})
-    data = data.execute()
+    data = supabase.rpc("inc_ticket_and_trophy", {"ptag": ptag, "tix": tix, "trophychange": trophychange}).execute()
     return data.data
 
 
