@@ -197,6 +197,3 @@ def export_battle_logs(time, clubtag):
     with open("club_league_logs.json", "w", encoding="utf8") as f:
         json.dump(logs, f, ensure_ascii=False)
     print(f"exported club league logs for {clubtag} on {time}")
-
-
-inc_ticket_and_trophy("#8JCLV8L8U",2, 9)
