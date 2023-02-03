@@ -139,17 +139,6 @@ async def CL_setter():
     data = get_clubs()
     for i in data:
         await reset_club_and_send_club_stats(i)
-    
-
-@bot.listen()
-async def on_ready():
-    await asyncio.gather(_club_league_monitor.start(), _club_member_update.start())
-
-
-@bot.listen()
-async def on_disconnect():
-    """To track bot's disconnection"""
-    print("disconnected at", disnake.utils.utcnow())
 
 
 @bot.slash_command()
@@ -202,6 +191,17 @@ class LogSelect(disnake.ui.StringSelect):
         await inter.followup.send(f"Successfully removed log(s) for {self.values}")
  
 
+@bot.listen()
+async def on_ready():
+    await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
+
+
+@bot.listen()
+async def on_disconnect():
+    """To track bot's disconnection"""
+    print("disconnected at", disnake.utils.utcnow())
+
+
 # Brawl Stars Clan League begins and ends at UTC-9
 # but we give some leniency for first and last updates
 # because some people do club league at last minutes
@@ -223,16 +223,21 @@ _club_league_monitor = Loop(
     interval=600,
 )
 
+async def print_now():
+    print("time:", disnake.utils.utcnow())
+
+keep_alive = Loop(
+    loop=loop,
+    coro=print_now,
+    interval=60,
+    weekday=(0,1,2,3,4,5,6)
+)
+
 def update_CL_WEEK():
     global CL_WEEK
     CL_WEEK = CL_WEEK + timedelta(days=7)
 
 CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(days=7, minutes=5)
 
-async def keep_alive():
-    await asyncio.sleep(60)
-    print("time:", disnake.utils.utcnow())
-    loop.create_task(keep_alive())
 
-loop.create_task(keep_alive())
 loop.run_until_complete(bot.start(st.secrets["TOKEN"]))

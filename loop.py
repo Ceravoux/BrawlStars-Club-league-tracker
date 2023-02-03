@@ -172,11 +172,12 @@ class Loop:
         return
 
     def start(self, *args, **kwargs) -> asyncio.Task:
-        if self._task is not None and not self._task.done():
+        print(f"\n\n{self.coro.__name__} is starting\n\n")
+        if self._task is not None:
             print(f"{self._task} is running!")
             return
-        print("start", self.coro.__name__)
         self._task = self.loop.create_task(
             self._loop(*args, **kwargs), name=repr(self.coro.__name__)
         )
+        print(f"\n\n{self.coro.__name__}'s task: {self._task}, done: {self._task.done()}\n\n")
         return self._task
