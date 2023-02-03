@@ -51,8 +51,9 @@ class MyCog(commands.Cog):
         try:
             player = await self.client.get_player(playertag)
         except Exception as e:
-            return await inter.followup.send(*e.args)
-
+            await inter.followup.send(*e.args)
+            raise e
+            
         emb = disnake.Embed(
             title="Player Info",
             description="\n".join(
@@ -80,7 +81,8 @@ class MyCog(commands.Cog):
         try:
             b = await self.client.get_brawler(BrawlerOptions[brawler].value)
         except Exception as e:
-            return await inter.followup.send(*e.args)
+            await inter.followup.send(*e.args)
+            raise e
 
         emb = disnake.Embed(
             title=b.name,
@@ -103,14 +105,16 @@ class MyCog(commands.Cog):
     ):
         await inter.response.defer()
         try:
-            log = [i async for i in self.client.get_battle_log(playertag, sort=1)]
+            log = await self.client.get_battle_log(playertag, sort=1)
+            log = [i async for i in log]
         except Exception as e:
-            return await inter.followup.send(*e.args)
+            await inter.followup.send(*e.args)
+            raise e
 
         l = len(log)
         emb = [disnake.Embed(title="Battle log")] * (1 + l // 10)
         for n in range(l):
-            emb[l // 10].add_field(
+            emb[n // 10].add_field(
                 name=f"{log[n].battle.type} - {log[n].battleTime}",
                 value=format_battle_log(log[n]),
             )
@@ -127,7 +131,8 @@ class MyCog(commands.Cog):
         try:
             logs = get_member_log(membertag)
         except Exception as e:
-            return await inter.followup.send(*e.args)
+            await inter.followup.send(*e.args)
+            raise e
 
         embed = disnake.Embed(
             title="{}'s Club League Log".format(logs[0]["playername"])
