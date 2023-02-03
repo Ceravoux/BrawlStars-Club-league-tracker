@@ -77,10 +77,11 @@ class MyCog(commands.Cog):
 
     @slash_command(BrawlStarsClient.get_brawler.__doc__)
     async def get_brawler_info(self, inter: disnake.AppCmdInter, brawler):
+        await inter.response.defer(with_message=True)
         try:
             b = await self.client.get_brawler(BrawlerOptions[brawler].value)
         except Exception as e:
-            await inter.response.send_message(*e.args)
+            await inter.followup.send(*e.args)
             raise e
 
         emb = disnake.Embed(
@@ -90,7 +91,7 @@ class MyCog(commands.Cog):
         emb.set_thumbnail(
             file=disnake.File(f"/app/brawlstars-club-league-tracker/brawlstars/assets/brawlers/{b.name.lower()}.png")
         )
-        await inter.response.send_message(
+        await inter.followup.send(
             content="I hope I will make this better... someday...", embed=emb
         )
 
