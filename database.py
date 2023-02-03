@@ -184,7 +184,7 @@ def remove_server_logs(serverid, clubtags: list):
 
 
 def export_battle_logs(time, clubtag):
-    logs = {"clubtag": clubtag, "ClubLeagueTime": str(time.day())}
+    logs = {"clubtag": clubtag, "ClubLeagueTime": str(time.date())}
     members = (
         club_members_table.select("playertag", "playername")
         .eq("clubtag", clubtag)
