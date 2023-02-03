@@ -103,7 +103,7 @@ async def update_club_stats(clubinfo):
 
     if now.astimezone(BS_TIMEZONE) > CL_WEEK:
         export_battle_logs(CL_WEEK, clubinfo["clubtag"])
-        await asyncio.gather(*(m.edit(embeds=[embed], file="club_league_logs.json") for m in messages))
+        await asyncio.gather(*(m.edit(embeds=[embed], file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
 
     await asyncio.gather(*(m.edit(embeds=[embed]) for m in messages))
     
