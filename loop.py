@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from time import gmtime
 import sys, traceback
 
+print(sys.platform)
 
 def to_datetime_from_seconds(s: int):
     """returns a datetime from seconds from epoch"""

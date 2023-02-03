@@ -88,7 +88,7 @@ class MyCog(commands.Cog):
             description=f"Gadgets: {b.gadgets}\n StarPowers: {b.starPowers}",
         )
         emb.set_thumbnail(
-            file=disnake.File(r"brawlstars\assets\brawlers\{}.png".format(b.name))
+            file=disnake.File(r"brawlstars/assets/brawlers/{}.png".format(b.name))
         )
         await inter.response.send_message(
             content="I hope I will make this better... someday...", embed=emb
