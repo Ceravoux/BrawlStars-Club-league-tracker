@@ -18,15 +18,12 @@ from database import (
     edit_discord_info,
     remove_server_logs,
     get_server_logs,
-    export_battle_logs,
-
+    export_battle_logs
 )
 from utils import format_member_stats, clubrank
 from datetime import timezone, timedelta, datetime
 import streamlit as st
-from os import getcwd
 
-print(getcwd())
 
 loop = asyncio.new_event_loop()
 client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
@@ -103,7 +100,7 @@ async def update_club_stats(clubinfo):
 
     if now.astimezone(BS_TIMEZONE) > CL_WEEK:
         export_battle_logs(CL_WEEK, clubinfo["clubtag"])
-        await asyncio.gather(*(m.edit(embeds=[embed], file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
+        await asyncio.gather(*(m.edit(embed=embed, file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
 
     await asyncio.gather(*(m.edit(embeds=[embed]) for m in messages))
     
@@ -146,6 +143,9 @@ async def CL_setter():
 
 @bot.listen()
 async def on_ready():
+    channel = await bot.fetch_channel(1058823341345095815)
+    msg = await channel.fetch_message(1070993408933511229)
+    await msg.edit(file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json"))
     await asyncio.gather(_club_league_monitor.start(), _club_member_update.start())
 
 

@@ -6,8 +6,8 @@ class Item(Base):
     __slots__ = ("id", "name")
 
     def __init__(self, data: dict) -> None:
-        self.id = data.get("id")
-        self.name = data.get("name")
+        self.id:int = data.get("id")
+        self.name:str = data.get("name")
 
     def __eq__(self, other) -> bool:
         return self.id == other.id and self.name == other.name
