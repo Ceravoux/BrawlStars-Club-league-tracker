@@ -13,11 +13,11 @@ def to_gif(path, names):
     so slightly"""
 
     for i in names:
-        im1 = Image.open(path + r"/{}.png".format(i))
+        im1 = Image.open(path + "/{}.png".format(i))
         im2 = im1.copy().filter(ImageFilter.DETAIL)
 
         im1.save(
-            path + r"/{}.gif".format(i),
+            path + "/{}.gif".format(i),
             append_images=[im2, im1],
             duration=100,
             save_all=True,
