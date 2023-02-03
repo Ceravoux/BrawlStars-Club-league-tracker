@@ -53,7 +53,7 @@ class MyCog(commands.Cog):
         except Exception as e:
             await inter.followup.send(*e.args)
             raise e
-            
+
         emb = disnake.Embed(
             title="Player Info",
             description="\n".join(
@@ -119,7 +119,7 @@ class MyCog(commands.Cog):
                 value=format_battle_log(log[n]),
             )
 
-        await inter.followup.send(embeds=[emb])
+        await inter.followup.send(embeds=emb)
 
     @slash_command()
     async def get_member_cl_log(
