@@ -98,11 +98,11 @@ async def update_club_stats(clubinfo):
         inline=False,
     )
 
-    if now.astimezone(BS_TIMEZONE) > CL_WEEK:
-        export_battle_logs(CL_WEEK, clubinfo["clubtag"])
-        await asyncio.gather(*(m.edit(embed=embed, file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
+    # if now.astimezone(BS_TIMEZONE) > CL_WEEK:
+    #     export_battle_logs(CL_WEEK, clubinfo["clubtag"])
+    #     await asyncio.gather(*(m.edit(embed=embed, file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
 
-    await asyncio.gather(*(m.edit(embeds=[embed]) for m in messages))
+    await asyncio.gather(*(m.edit(embed=embed) for m in messages))
     
 
 # HACK: do this better?
@@ -135,17 +135,14 @@ async def reset_club_and_send_club_stats(clubinfo):
 
 
 async def CL_setter():
+    update_CL_WEEK()
     data = get_clubs()
     for i in data:
         await reset_club_and_send_club_stats(i)
-    update_CL_WEEK()
     
 
 @bot.listen()
 async def on_ready():
-    channel = await bot.fetch_channel(1058823341345095815)
-    msg = await channel.fetch_message(1070993408933511229)
-    await msg.edit(file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json"))
     await asyncio.gather(_club_league_monitor.start(), _club_member_update.start())
 
 

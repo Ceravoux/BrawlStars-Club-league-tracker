@@ -104,7 +104,7 @@ class MyCog(commands.Cog):
         self, inter: disnake.AppCmdInter, playertag: commands.String[5, 12]
     ):
         try:
-            log = await self.client.get_battle_log(playertag, sort=1)
+            log = [i async for i in self.client.get_battle_log(playertag, sort=1)]
         except Exception as e:
             return await inter.response.send_message(*e.args)
 
