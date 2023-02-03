@@ -47,12 +47,11 @@ class MyCog(commands.Cog):
     async def get_player_info(
         self, inter: disnake.AppCmdInter, playertag: commands.String[5, 12]
     ):
-
+        await inter.response.defer()
         try:
             player = await self.client.get_player(playertag)
         except Exception as e:
-            await inter.response.send_message(*e.args)
-            raise e
+            return await inter.followup.send(*e.args)
 
         emb = disnake.Embed(
             title="Player Info",
@@ -71,7 +70,7 @@ class MyCog(commands.Cog):
             ),
         )
 
-        await inter.response.send_message(
+        await inter.followup.send(
             "Maybe someday I'll make the brawler part...", embed=emb
         )
 
@@ -81,8 +80,7 @@ class MyCog(commands.Cog):
         try:
             b = await self.client.get_brawler(BrawlerOptions[brawler].value)
         except Exception as e:
-            await inter.followup.send(*e.args)
-            raise e
+            return await inter.followup.send(*e.args)
 
         emb = disnake.Embed(
             title=b.name,
@@ -103,10 +101,11 @@ class MyCog(commands.Cog):
     async def get_battle_log(
         self, inter: disnake.AppCmdInter, playertag: commands.String[5, 12]
     ):
+        await inter.response.defer()
         try:
             log = [i async for i in self.client.get_battle_log(playertag, sort=1)]
         except Exception as e:
-            return await inter.response.send_message(*e.args)
+            return await inter.followup.send(*e.args)
 
         l = len(log)
         emb = [disnake.Embed(title="Battle log")] * (1 + l // 10)
@@ -116,7 +115,7 @@ class MyCog(commands.Cog):
                 value=format_battle_log(log[n]),
             )
 
-        await inter.response.send_message(embeds=[emb])
+        await inter.followup.send(embeds=[emb])
 
     @slash_command()
     async def get_member_cl_log(
@@ -124,11 +123,11 @@ class MyCog(commands.Cog):
     ):
         """gets the club league log of a member 
         during the last(current) club league week."""
+        await inter.response.defer()
         try:
             logs = get_member_log(membertag)
         except Exception as e:
-            await inter.response.send_message(*e.args)
-            raise e
+            return await inter.followup.send(*e.args)
 
         embed = disnake.Embed(
             title="{}'s Club League Log".format(logs[0]["playername"])
@@ -140,4 +139,4 @@ class MyCog(commands.Cog):
                 f'{i["team"]} vs {i["opponent"]}',
                 inline=False,
             )
-        await inter.response.send_message(embed=embed)
+        await inter.followup.send(embed=embed)
