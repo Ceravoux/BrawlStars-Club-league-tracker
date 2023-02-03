@@ -24,7 +24,9 @@ from database import (
 from utils import format_member_stats, clubrank
 from datetime import timezone, timedelta, datetime
 import streamlit as st
+from os import getcwd
 
+print(getcwd())
 
 loop = asyncio.new_event_loop()
 client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
@@ -105,7 +107,6 @@ async def update_club_stats(clubinfo):
 
     await asyncio.gather(*(m.edit(embeds=[embed]) for m in messages))
     
-
 
 # HACK: do this better?
 async def CL_watcher():
