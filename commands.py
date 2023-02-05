@@ -112,6 +112,7 @@ class MyCog(commands.Cog):
             raise e
 
         l = len(log)
+        
         emb = [disnake.Embed(title="Battle log") for _ in range(1 + l // 8)]
         for n in range(l):
             print(emb[n//8].fields)
@@ -120,8 +121,8 @@ class MyCog(commands.Cog):
                 name=f"{log[n].battle.type} - {log[n].battleTime}",
                 value=format_battle_log(log[n]),
             )
-
-        await inter.followup.send(embeds=emb)
+        for i in emb:
+            await inter.followup.send(embed=i)
 
     @slash_command()
     async def get_member_cl_log(
