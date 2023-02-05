@@ -115,7 +115,7 @@ class MyCog(commands.Cog):
         emb = [disnake.Embed(title="Battle log") for _ in range(1 + l // 8)]
         for n in range(l):
             print(emb[n//8].fields)
-            print(len(emb[n//0]))
+            print(len(emb[n//8]))
             emb[n // 8].add_field(
                 name=f"{log[n].battle.type} - {log[n].battleTime}",
                 value=format_battle_log(log[n]),
