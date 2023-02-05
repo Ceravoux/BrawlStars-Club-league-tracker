@@ -232,7 +232,7 @@ def update_CL_WEEK():
     global CL_WEEK
     CL_WEEK = CL_WEEK + timedelta(days=7)
 
-CL_WEEK = from_weekday(0, tzinfo=timezone(timedelta=-9))
+CL_WEEK = from_weekday(0, tzinfo=timezone(timedelta(hours=-9)))
 st.text(f"CL_WEEK: {CL_WEEK}")
 
 async def loop_starter():
