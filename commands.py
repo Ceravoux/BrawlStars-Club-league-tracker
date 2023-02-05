@@ -8,22 +8,25 @@ from database import get_member_log
 from loop import to_datetime_from_seconds
 import re
 
+
 def slash_command(docstring="", **kwargs):
     """cuts description to 100chars for slash commands."""
     docstring = cleandoc(docstring)
+
     def decorator(func):
         if func.__doc__ is not None:
             return commands.slash_command()(func)
 
         m = re.search(r"Parameters", docstring)
         if m:
-            desc =  docstring[:m.start()]
+            desc = docstring[: m.start()]
             if len(desc) > 100:
                 desc = desc[:100]
-            func.__doc__ = desc + "\n" + docstring[m.start():]
+            func.__doc__ = desc + "\n" + docstring[m.start() :]
         else:
             func.__doc__ = docstring
         return commands.slash_command(**kwargs)(func)
+
     return decorator
 
 
@@ -89,7 +92,9 @@ class MyCog(commands.Cog):
             description=f"Gadgets: {b.gadgets}\n StarPowers: {b.starPowers}",
         )
         emb.set_thumbnail(
-            file=disnake.File(f"/app/brawlstars-club-league-tracker/brawlstars/assets/brawlers/{b.name.lower()}.png")
+            file=disnake.File(
+                f"/app/brawlstars-club-league-tracker/brawlstars/assets/brawlers/{b.name.lower()}.png"
+            )
         )
         await inter.followup.send(
             content="I hope I will make this better... someday...", embed=emb
@@ -112,12 +117,10 @@ class MyCog(commands.Cog):
             raise e
 
         l = len(log)
-        
-        emb = [disnake.Embed(title="Battle log") for _ in range(1 + l // 8)]
+
+        emb = [disnake.Embed(title="Battle log") for _ in range(1 + l // 6)]
         for n in range(l):
-            print(emb[n//8].fields)
-            print(len(emb[n//8]))
-            emb[n // 8].add_field(
+            emb[n // 6].add_field(
                 name=f"{log[n].battle.type} - {log[n].battleTime}",
                 value=format_battle_log(log[n]),
             )
@@ -128,7 +131,7 @@ class MyCog(commands.Cog):
     async def get_member_cl_log(
         self, inter: disnake.AppCmdInter, membertag: commands.String[5, 12]
     ):
-        """gets the club league log of a member 
+        """gets the club league log of a member
         during the last(current) club league week."""
         await inter.response.defer()
         try:
