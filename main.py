@@ -194,7 +194,7 @@ class LogSelect(disnake.ui.StringSelect):
 @bot.listen()
 async def on_disconnect():
     """To track bot's disconnection"""
-    print("disconnected at", disnake.utils.utcnow())
+    st.text(f"disconnected at {disnake.utils.utcnow()}")
 
 
 # Brawl Stars Clan League begins and ends at UTC-9
@@ -219,7 +219,7 @@ _club_league_monitor = Loop(
 )
 
 async def print_now():
-    print("time:", disnake.utils.utcnow())
+    st.text(f"time: {disnake.utils.utcnow()}")
 
 keep_alive = Loop(
     loop=loop,
@@ -233,14 +233,14 @@ def update_CL_WEEK():
     CL_WEEK = CL_WEEK + timedelta(days=7)
 
 CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE)
-print(CL_WEEK)
+st.text(CL_WEEK)
 
 async def loop_starter():
     await bot.wait_until_ready()
     await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
 
 async def bot_starter():
-    print("Starting...")
+    st.text("Starting...")
     await asyncio.gather(bot.start(st.secrets["TOKEN"]), loop_starter())
 
 loop.run_until_complete(bot_starter())
