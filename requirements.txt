@@ -1,4 +1,4 @@
-request<3.0,>2.4
+requests<3.0,>2.4
 charset-normalizer<3.0,>2.0
 supabase==0.7.1
 disnake==2.7
