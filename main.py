@@ -98,9 +98,9 @@ async def update_club_stats(clubinfo):
         inline=False,
     )
 
-    # if now.astimezone(BS_TIMEZONE) > CL_WEEK:
-    #     export_battle_logs(CL_WEEK, clubinfo["clubtag"])
-    #     await asyncio.gather(*(m.edit(embed=embed, file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
+    if now.astimezone(BS_TIMEZONE) > CL_WEEK:
+        export_battle_logs(CL_WEEK, clubinfo["clubtag"])
+        await asyncio.gather(*(m.edit(embed=embed, file=disnake.File("/app/brawlstars-club-league-tracker/club_league_logs.json")) for m in messages))
 
     await asyncio.gather(*(m.edit(embed=embed) for m in messages))
     
@@ -189,11 +189,6 @@ class LogSelect(disnake.ui.StringSelect):
         await inter.response.defer(with_message=True)
         remove_server_logs(inter.guild_id, self.values)
         await inter.followup.send(f"Successfully removed log(s) for {self.values}")
- 
-
-@bot.listen()
-async def on_ready():
-    await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
 
 
 @bot.listen()
@@ -237,7 +232,15 @@ def update_CL_WEEK():
     global CL_WEEK
     CL_WEEK = CL_WEEK + timedelta(days=7)
 
-CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(days=7, minutes=5)
+CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE)
+print(CL_WEEK)
 
+async def loop_starter():
+    await bot.wait_until_ready()
+    await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
 
-loop.run_until_complete(bot.start(st.secrets["TOKEN"]))
+async def bot_starter():
+    print("Starting...")
+    await asyncio.gather(bot.start(st.secrets["TOKEN"]), loop_starter())
+
+loop.run_until_complete(bot_starter())
