@@ -225,14 +225,14 @@ keep_alive = Loop(
     loop=loop,
     coro=print_now,
     interval=60,
-    weekday=(0,1,2,3,4,5,6)
+    weekday=(0, 1, 2, 3, 4, 5, 6)
 )
 
 def update_CL_WEEK():
     global CL_WEEK
     CL_WEEK = CL_WEEK + timedelta(days=7)
 
-CL_WEEK = from_weekday(0, tzinfo=BS_TIMEZONE) - timedelta(minutes=5)
+CL_WEEK = from_weekday(0, tzinfo=timezone(timedelta=-9))
 st.text(f"CL_WEEK: {CL_WEEK}")
 
 async def loop_starter():
