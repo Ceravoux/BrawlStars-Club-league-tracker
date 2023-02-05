@@ -201,7 +201,9 @@ async def on_disconnect():
 @bot.listen()
 async def on_ready():
     print(f"on_ready : {datetime.now(timezone(timedelta(hours=7)))}")
-
+    await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
+    
+    
 # Brawl Stars Clan League begins and ends at UTC-9
 # but we give some leniency for first and last updates
 # because some people do club league at last minutes
@@ -253,4 +255,4 @@ st.text(f"CL_WEEK: {CL_WEEK}")
 st.text("Starting...")
 
 
-loop.run_until_complete(asyncio.gather(bot.start(st.secrets["TOKEN"]), _club_league_monitor.start(), _club_member_update.start(), keep_alive.start()))
+loop.run_until_complete(bot.start(st.secrets["TOKEN"]))
