@@ -26,6 +26,7 @@ import streamlit as st
 
 
 loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 client = BrawlStarsClient(api_key=st.secrets["API_KEY"])
 loop.run_until_complete(client.start())
 
@@ -104,7 +105,7 @@ async def update_club_stats(clubinfo):
 
     await asyncio.gather(*(m.edit(embed=embed) for m in messages))
     
-
+asyncio.set_e
 # HACK: do this better?
 async def CL_watcher():
     today = datetime.now(tz=BS_TIMEZONE).day 
@@ -249,9 +250,7 @@ st.text(f"CL_WEEK: {CL_WEEK}")
 #     await asyncio.gather(_club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
 
 
-async def bot_starter():
-    st.text("Starting...")
-    await asyncio.gather(bot.start(st.secrets["TOKEN"]), _club_league_monitor.start(), _club_member_update.start(), keep_alive.start())
+st.text("Starting...")
 
 
-loop.run_until_complete(bot_starter())
+loop.run_until_complete(asyncio.gather(bot.start(st.secrets["TOKEN"]), _club_league_monitor.start(), _club_member_update.start(), keep_alive.start()))
