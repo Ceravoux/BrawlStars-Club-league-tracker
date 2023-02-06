@@ -105,7 +105,7 @@ async def update_club_stats(clubinfo):
 
     await asyncio.gather(*(m.edit(embed=embed) for m in messages))
     
-asyncio.set_e
+
 # HACK: do this better?
 async def CL_watcher():
     today = datetime.now(tz=BS_TIMEZONE).day 
