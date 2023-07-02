@@ -1,10 +1,12 @@
 from supabase import create_client
 from brawlstars.http import BrawlStarsClient, Battle
 import json
-import streamlit as st
+import os
+from dotenv import load_dotenv
+load_dotenv()
+import supabase
 
-
-supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 club_members_table = supabase.table("club_members")
 club_league_table = supabase.table("club_league")
 clubs_table = supabase.table("clubs")
@@ -87,7 +89,15 @@ def inc_ticket_and_trophy(ptag: str, tix: int, trophychange: int):
     return data.data
 
 
-def get_club_stats(clubtag):
+def get_club_members(clubtag):
+    """returns an array of {
+        playertag: #XXXXXXXXX,
+        playername: str,
+        clubtag: str,
+        clubname: str,
+        tickets: int,
+        trophy: int
+    }"""
     data = club_members_table.select("*").eq("clubtag", clubtag).execute()
     return data.data
 
@@ -108,6 +118,7 @@ def insert_club(clubtag, clubrank):
         .execute()
     )
     return data.data
+
 
 def insert_discord_info(
     clubtag: str, serverid: int, channelid: int
