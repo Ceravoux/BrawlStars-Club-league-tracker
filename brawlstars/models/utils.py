@@ -10,7 +10,8 @@ class Base:
 
 
 def parse_battleTime(battleTime: str):
-    """parse battleTime from ISO-format to aware datetime object (UTC)"""
+    """parse battleTime from ISO-format to aware datetime object (UTC)
+    battleTime format: YYYYMMDDTHHMMSS.000Z"""
     if not len(battleTime) == 20 and isinstance(battleTime, str):
         raise ValueError("invalid battleTime")
     year = int(battleTime[:4])

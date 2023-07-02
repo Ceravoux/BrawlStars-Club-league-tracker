@@ -140,12 +140,11 @@ class Loop:
     async def _sleep(self):
         self._sleeping = self.loop.create_future()
         t = self._prepare_time()
-        print(t, self.coro.__name__)
+        # print(t, self.coro.__name__)
         self.loop.call_later(t, self._sleeping.set_result, 1)
         await self._sleeping
 
     async def _loop(self, *args, **kwargs):
-
         while True:
             await self._sleep()
             try:
@@ -172,12 +171,12 @@ class Loop:
         return
 
     def start(self, *args, **kwargs) -> asyncio.Task:
-        print(f"\n\n{self.coro.__name__} is starting\n\n")
         if self._task is None:
+            print(f"\n\n{self.coro.__name__} is starting\n")
             self._task = self.loop.create_task(
                 self._loop(*args, **kwargs), name=repr(self.coro.__name__)
             )
-            print(f"\n\n{self.coro.__name__}'s task: {self._task}, done: {self._task.done()}\n\n")
+            print(f"\n\n{self.coro.__name__}'s task: {self._task}, done: {self._task.done()}\n")
             return self._task
         print(f"{self.coro.__name__} is running")
         return

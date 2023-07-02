@@ -41,24 +41,25 @@ def format_brawler_info(brawlerinfo: BrawlerInfo):
 
 
 def format_battle_log(battle: Battle):
-    fmt = f"{battle.event.mode} | {battle.event.map}\n{battle.result} {battle.trophyChange:+2} 🏆\n"
+    fmt = f"{battle.event.mode} | {battle.event.map}\n"\
+          f"{battle.result} {battle.trophyChange:+2}🏆\n"
     for t in battle.teams:
         for p in t:
-            fmt += format_brawler_info(p.brawler) + p.name + "\n"
+            fmt += format_brawler_info(p.brawler) + f"`{p.name}`" + "\n"
     for p in battle.players:
-        fmt += format_brawler_info(p.brawler) + p.name + "\n"
+        fmt += format_brawler_info(p.brawler) + f"`{p.name}`" + "\n"
 
     return fmt
 
 
-def format_member_stats(stats: list[dict]) -> tuple[str, int]:
+def format_member_stats(members: list[dict]) -> tuple[str, int]:
     string = ""
     trophy = 0
-    for s in stats:
-        string += "{:2d}/14🎟️ {:2d} 🏆 | {}\n".format(
-            s["tickets"], s["trophy"], s["playername"]
+    for m in members:
+        string += "{:2d}/14🎟️ {:2d} 🏆|`{}`\n".format(
+            m["tickets"], m["trophy"], m["playername"]
         )
-        trophy += s["trophy"]
+        trophy += m["trophy"]
     return string, trophy
 
 
